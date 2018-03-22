@@ -29,6 +29,8 @@ ifdef PG_PASSWORD
 CONNECTION += password=$(PG_PASSWORD)
 endif
 
+PSQL = psql $(PSQLFLAGS)
+
 scrape: ; $(PYTHON) src/scrape.py -d $(CONNECTION) --patterns --positions
 
 init: sql/schema.sql

@@ -1,13 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+from __future__ import print_function
 import os
 import sys
-from itertools import zip_longest
 import argparse
-import json
 import requests
 import psycopg2
 from psycopg2.extras import execute_batch
-
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 """
 Scrape current vehicle positions and patterns from
