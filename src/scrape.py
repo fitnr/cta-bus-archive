@@ -111,6 +111,10 @@ def fetch_patterns(api_key, pids):
     return patterns
 
 
+def get_current_pids(cursor):
+    cursor.execute('select pid from cta.patterns')
+    return set(row[0] for row in cursor.fetchall())
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--database', default=None, required=True,
@@ -130,7 +134,8 @@ def main():
             conn.commit()
 
         if args.positions and args.patterns:
-            pids = set(x['pid'] for x in positions)
+            current_pids = get_current_pids(cursor)
+            pids = set(x['pid'] for x in positions).difference(current_pids)
 
             patterns = fetch_patterns(args.key, pids)
             execute_batch(cursor, INSERT_PATTERNS, patterns)

@@ -1,6 +1,6 @@
 shell = bash
 
-PYTHON = python3
+PYTHON = python
 
 PG_HOST ?=
 PG_PORT ?=
