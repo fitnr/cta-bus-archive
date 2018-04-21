@@ -2,31 +2,31 @@ shell = bash
 
 PYTHON = python
 
-PG_HOST ?=
-PG_PORT ?=
-PG_USER ?=
-PG_DATABASE ?=
-PSQLFLAGS = $(PG_DATABASE)
+PGHOST ?=
+PGPORT ?=
+PGUSER ?=
+PGDATABASE ?=
+PSQLFLAGS = $(PGDATABASE)
 
-CONNECTION = dbname=$(PG_DATABASE)
+CONNECTION = dbname=$(PGDATABASE)
 
-ifdef PG_HOST
-CONNECTION += host=$(PG_HOST)
-PSQLFLAGS += -h $(PG_HOST)
+ifdef PGHOST
+CONNECTION += host=$(PGHOST)
+PSQLFLAGS += -h $(PGHOST)
 endif
 
-ifdef PG_PORT
-CONNECTION += port=$(PG_PORT)
-PSQLFLAGS += -p $(PG_PORT)
+ifdef PGPORT
+CONNECTION += port=$(PGPORT)
+PSQLFLAGS += -p $(PGPORT)
 endif
 
-ifdef PG_USER
-CONNECTION += user=$(PG_USER)
-PSQLFLAGS += -U $(PG_USER)
+ifdef PGUSER
+CONNECTION += user=$(PGUSER)
+PSQLFLAGS += -U $(PGUSER)
 endif
 
-ifdef PG_PASSWORD
-CONNECTION += password=$(PG_PASSWORD)
+ifdef PGPASSWORD
+CONNECTION += password=$(PGPASSWORD)
 endif
 
 PSQL = psql $(PSQLFLAGS)
