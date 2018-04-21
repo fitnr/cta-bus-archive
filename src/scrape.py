@@ -137,19 +137,23 @@ def main():
             current_pids = get_current_pids(cursor)
             pids = set(x['pid'] for x in positions).difference(current_pids)
 
-            patterns = fetch_patterns(args.key, pids)
-            execute_batch(cursor, INSERT_PATTERNS, patterns)
-            print('inserted', len(patterns), 'patterns', file=sys.stderr)
-            conn.commit()
+            if len(pids) == 0:
+                print('No new patterns', file=sys.stderr)
 
-            patternstops = [dict(pid=x['pid'], **stop) for x in patterns for stop in x['pt']]
-            for p in patternstops:
-                p.setdefault('stpid')
-                p.setdefault('stpnm')
+            else:
+                patterns = fetch_patterns(args.key, pids)
+                execute_batch(cursor, INSERT_PATTERNS, patterns)
+                print('inserted', len(patterns), 'patterns', file=sys.stderr)
+                conn.commit()
 
-            execute_batch(cursor, INSERT_PATTERN_STOPS, patternstops)
-            print('inserted', len(patternstops), 'patternstops', file=sys.stderr)
-            conn.commit()
+                patternstops = [dict(pid=x['pid'], **stop) for x in patterns for stop in x['pt']]
+                for p in patternstops:
+                    p.setdefault('stpid')
+                    p.setdefault('stpnm')
+
+                execute_batch(cursor, INSERT_PATTERN_STOPS, patternstops)
+                print('inserted', len(patternstops), 'patternstops', file=sys.stderr)
+                conn.commit()
 
 
 if __name__ == '__main__':
