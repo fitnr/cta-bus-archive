@@ -2,20 +2,22 @@
 from __future__ import print_function
 import os
 import sys
-import argparse
-import requests
-import psycopg2
-from psycopg2.extras import execute_batch
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
+import argparse
+import requests
+import psycopg2
+from psycopg2.extras import execute_batch
 
 """
 Scrape current vehicle positions and patterns from
 the CTA Bus Tracker API and load into a postgres database.
 """
+
 API = 'http://www.ctabustracker.com/bustime/api/v2/{}'
+
 """
 "vid": "7934", vehicle_id
 "tmstmp": "20180321 17:27", timestamp with time zone
@@ -31,6 +33,7 @@ API = 'http://www.ctabustracker.com/bustime/api/v2/{}'
 "tablockid": "1 -751", tablockid text
 "zone": "" zone text
 """
+
 INSERT_POSITIONS = """
     INSERT INTO cta.positions (
         timestamp, vehicle_id, latitude, longitude, bearing, pattern_id, route_id,
@@ -41,11 +44,13 @@ INSERT_POSITIONS = """
         %(des)s, %(pdist)s, %(dly)s::boolean, %(tatripid)s, %(tablockid)s, %(zone)s
     ) ON CONFLICT DO NOTHING
 """
+
 INSERT_PATTERNS = """
     INSERT INTO cta.patterns ("pid", "length", "route_direction")
     VALUES (%(pid)s::integer, %(ln)s, %(rtdir)s)
     ON CONFLICT DO NOTHING
 """
+
 INSERT_PATTERN_STOPS = """
     INSERT INTO cta.pattern_stops (
         pid, stop_id, stop_name, stop_sequence, pdist, latitude, longitude, type
@@ -63,12 +68,14 @@ def grouper(n, iterable, fillvalue=None):
 
 
 def fetch_routeids(session):
+    """Request current route IDs from the API."""
     r = session.get(API.format('getroutes'))
     routes = r.json().get('bustime-response').get('routes')
     return [r['rt'] for r in routes]
 
 
 def fetch_positions(api_key):
+    """Request positions from the API."""
     positions = []
     with requests.Session() as session:
         session.params = {'key': api_key, 'format': 'json'}
@@ -81,8 +88,8 @@ def fetch_positions(api_key):
             params = {
                 'rt': ','.join(grp).strip(',')
             }
-            v = session.get(API.format('getvehicles'), params=params)
-            vehicles = v.json().get('bustime-response').get('vehicle')
+            raw = session.get(API.format('getvehicles'), params=params)
+            vehicles = raw.json().get('bustime-response').get('vehicle')
             try:
                 positions.extend(vehicles)
             except TypeError:
@@ -92,6 +99,7 @@ def fetch_positions(api_key):
 
 
 def fetch_patterns(api_key, pids):
+    """Request patterns from the API."""
     patterns = []
     with requests.Session() as session:
         session.params = {'key': api_key, 'format': 'json'}
@@ -101,8 +109,8 @@ def fetch_patterns(api_key, pids):
             params = {
                 'pid': ','.join(grp).strip(',')
             }
-            p = session.get(API.format('getpatterns'), params=params)
-            pattern = p.json().get('bustime-response').get('ptr')
+            raw = session.get(API.format('getpatterns'), params=params)
+            pattern = raw.json().get('bustime-response').get('ptr')
             try:
                 patterns.extend(pattern)
             except TypeError:
@@ -112,10 +120,16 @@ def fetch_patterns(api_key, pids):
 
 
 def get_current_pids(cursor):
+    """
+    Get extant pattern IDs from the the DB,
+    to be compared against new ones in the feed.
+    """
     cursor.execute('select pid from cta.patterns')
     return set(row[0] for row in cursor.fetchall())
 
+
 def main():
+    """Scrape positions."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--database', default=None, required=True,
                         help='Database connection string')
@@ -146,10 +160,14 @@ def main():
                 print('inserted', len(patterns), 'patterns', file=sys.stderr)
                 conn.commit()
 
-                patternstops = [dict(pid=x['pid'], **stop) for x in patterns for stop in x['pt']]
-                for p in patternstops:
-                    p.setdefault('stpid')
-                    p.setdefault('stpnm')
+                patternstops = [
+                    dict(pid=x['pid'], **stop)
+                    for x in patterns
+                    for stop in x['pt']
+                ]
+                for patternstop in patternstops:
+                    patternstop.setdefault('stpid')
+                    patternstop.setdefault('stpnm')
 
                 execute_batch(cursor, INSERT_PATTERN_STOPS, patternstops)
                 print('inserted', len(patternstops), 'patternstops', file=sys.stderr)

@@ -1,0 +1,7 @@
+PATH=/bin:/usr/bin:/usr/local/bin
+SHELL=/bin/bash
+CTA_API_KEY="<insert key here>"
+PGDATABASE="<insert pg database here>"
+
+*/3 4-22 * * * make -e -C $HOME/cta-bus-archive scrape 2>/dev/null > /dev/null
+*/5 23,0-3 * * * make -e -C $HOME/cta-bus-archive scrape 2>/dev/null > /dev/null

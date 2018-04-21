@@ -5,7 +5,7 @@ PYTHON = python
 PGHOST ?=
 PGPORT ?=
 PGUSER ?=
-PGDATABASE ?=
+PGDATABASE ?= $(PGUSER)
 PSQLFLAGS = $(PGDATABASE)
 
 CONNECTION = dbname=$(PGDATABASE)
@@ -25,13 +25,10 @@ CONNECTION += user=$(PGUSER)
 PSQLFLAGS += -U $(PGUSER)
 endif
 
-ifdef PGPASSWORD
-CONNECTION += password=$(PGPASSWORD)
-endif
-
 PSQL = psql $(PSQLFLAGS)
 
 scrape: ; $(PYTHON) src/scrape.py -d $(CONNECTION) --patterns --positions
 
-init: sql/schema.sql
+init: sql/schema.sql requirements.txt
+	$(PYTHON) -m pip install -r $(filter %.txt,$^)
 	$(PSQL) -f $<
