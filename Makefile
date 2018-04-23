@@ -28,6 +28,9 @@ endif
 PSQL = psql $(PSQLFLAGS)
 
 BUCKET = chibus
+DATE = 2018-01-01
+YEAR = $(shell echo $(DATE) | sed 's/\(.\{4\}\)-.*/\1/')
+MONTH =	$(shell echo $(DATE) | sed 's/.\{4\}-\(.\{2\}\)-.*/\1/')
 
 .PHONY: gcloud s3
 
