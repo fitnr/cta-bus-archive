@@ -42,3 +42,11 @@ This will update the Postgres database with current positions as well as new bus
 ## Scheduling
 
 See `crontab.txt` for a sample cron job that schedules regular fetches from the API.
+
+### Details about CTA standards
+
+* CTA service standards define AM peak as 6-9 am and PM peak as 3-7 pm.
+
+* CTA defines on-time performance as trips leaving the terminal no more than 1 minute ahead of schedule and no more than 5 minutes later than schedule.
+
+* Bus bunching is defined as buses that depart the same timepoint within 60 seconds of each other. This is calculated as percentage of all buses that passed through the timepoint.
