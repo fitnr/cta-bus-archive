@@ -41,12 +41,12 @@ gcloud: $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv.xz
 
 $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv.xz: | $(PREFIX)/$(YEAR)/$(MONTH)
 	$(PSQL) -c "COPY (\
-		SELECT * FROM rt_vehicle_positions WHERE timestamp::date = '$(DATE)'::date \
+		SELECT * FROM cta.positions WHERE timestamp::date = '$(DATE)'::date \
 		) TO STDOUT WITH (FORMAT CSV, HEADER true)" | \
 	xz -z - > $@
 
 clean-date:
-	$(PSQL) -c "DELETE FROM rt_vehicle_positions where timestamp::date = '$(DATE)'::date"
+	$(PSQL) -c "DELETE FROM cta.positions where timestamp::date = '$(DATE)'::date"
 	rm -f $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv{.xz,}
 
 

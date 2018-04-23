@@ -32,5 +32,6 @@ CREATE TABLE IF NOT EXISTS cta.pattern_stops (
 CREATE TABLE IF NOT EXISTS cta.patterns (
     "pid" int PRIMARY KEY,
     "length" numeric,
-    "route_direction" text
+    "route_direction" text,
+    "timestamp" timestamp default current_timestamp
 );
