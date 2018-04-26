@@ -62,6 +62,9 @@ $(YEAR)/$(MONTH):
 
 clean-date:
 	$(PSQL) -c "DELETE FROM cta.positions where timestamp::date = '$(DATE)'::date"
+	$(PSQL) -c "DELETE FROM cta.pattern_stops using cta.patterns p \
+		where pattern_stops.pid = p.pid and timestamp::date = '$(DATE)'::date"
+	$(PSQL) -c "DELETE FROM cta.patterns where timestamp::date = '$(DATE)'::date"
 	rm -f $(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv{.xz,}
 
 init: sql/schema.sql requirements.txt
