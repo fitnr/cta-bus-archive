@@ -36,22 +36,31 @@ MONTH =	$(shell echo $(DATE) | sed 's/.\{4\}-\(.\{2\}\)-.*/\1/')
 
 scrape: ; $(PYTHON) src/scrape.py -d "$(CONNECTION)" --patterns --positions
 
-s3: $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv.xz
-	aws s3 cp --quiet --acl public-read $< s3://$(BUCKET)
+s3: $(YEAR)/$(MONTH)/$(DATE)-positions.csv.xz $(YEAR)/$(MONTH)/$(DATE)-patterns.csv.xz $(YEAR)/$(MONTH)/$(DATE)-patternstops.csv.xz
+	for f in $(^F); do aws s3 cp --quiet --acl public-read $(<F)/$$f s3://$(BUCKET) ; done
 
-gcloud: $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv.xz
+gcloud: $(YEAR)/$(MONTH)/$(DATE)-positions.csv.xz
 	gsutil cp -rna public-read $< gs://$(BUCKET)/$<
 
-$(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv.xz: | $(PREFIX)/$(YEAR)/$(MONTH)
+$(YEAR)/$(MONTH)/$(DATE)-patterns.csv.xz $(YEAR)/$(MONTH)/$(DATE)-positions.csv.xz: $(YEAR)/$(MONTH)/$(DATE)-%.csv.xz: | $(YEAR)/$(MONTH)
 	$(PSQL) -c "COPY (\
-		SELECT * FROM cta.positions WHERE timestamp::date = '$(DATE)'::date \
+		SELECT * FROM cta.$* WHERE timestamp::date = '$(DATE)'::date \
 		) TO STDOUT WITH (FORMAT CSV, HEADER true)" | \
 	xz -z - > $@
 
+$(YEAR)/$(MONTH)/$(DATE)-pattern_stops.csv.xz: | $(YEAR)/$(MONTH)
+	$(PSQL) -c "COPY (\
+		SELECT a.* FROM cta.pattern_stops a INNER JOIN cta.patterns USING (pid) \
+		WHERE timestamp::date = '$(DATE)'::date \
+		) TO STDOUT WITH (FORMAT CSV, HEADER true)" | \
+	xz -z - > $@
+
+$(YEAR)/$(MONTH):
+	mkdir -p $@
+
 clean-date:
 	$(PSQL) -c "DELETE FROM cta.positions where timestamp::date = '$(DATE)'::date"
-	rm -f $(PREFIX)/$(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv{.xz,}
-
+	rm -f $(YEAR)/$(MONTH)/$(DATE)-bus-positions.csv{.xz,}
 
 init: sql/schema.sql requirements.txt
 	$(PYTHON) -m pip install -r $(filter %.txt,$^)

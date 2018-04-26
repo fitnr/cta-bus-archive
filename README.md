@@ -19,7 +19,7 @@ Create environment variables to track how you log into the db (which could be re
 export CTA_API_KEY=<api key>
 export PGUSER=<user> # defaults to your user
 export PGDATABASE=<dbname> # defaults to your user
-export PGHOST=<xyz> # defaults to socker
+export PGHOST=<xyz> # defaults to socket
 export PGPORT=<defaults to 5432>
 ````
 
