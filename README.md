@@ -15,11 +15,14 @@ Install PostgreSQL on your system and create a database.
 
 Create environment variables to track how you log into the db (which could be remote).
 
-````
+````bash
 export CTA_API_KEY=<api key>
-export PGUSER=<user> # defaults to your user
-export PGDATABASE=<dbname> # defaults to your user
-export PGHOST=<xyz> # defaults to socket
+````
+Optionally, add these variables for connection to a Postgres database. This isn't necessary if you're using an eponymous postgres user to connect to an eponymous database over the socket.
+````bash
+export PGUSER=<defaults to your user>
+export PGDATABASE=<defaults to your user>
+export PGHOST=<defaults to socket>
 export PGPORT=<defaults to 5432>
 ````
 
@@ -33,6 +36,11 @@ make init
 ## Scrape
 
 To save the current snapshot of bus positions:
+```
+python src/scrape.py -d dbname=database --positions
+```
+
+or, for short:
 ```
 make -e scrape
 ```
@@ -50,3 +58,8 @@ See `crontab.txt` for a sample cron job that schedules regular fetches from the 
 * CTA defines on-time performance as trips leaving the terminal no more than 1 minute ahead of schedule and no more than 5 minutes later than schedule.
 
 * Bus bunching is defined as buses that depart the same timepoint within 60 seconds of each other. This is calculated as percentage of all buses that passed through the timepoint.
+
+
+## License
+
+Copyright 2018 Active Transportation Alliance. Licensed under the Apache License, Version 2.0.
