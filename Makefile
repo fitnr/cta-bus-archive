@@ -32,12 +32,14 @@ DATE = 2018-01-01
 YEAR = $(shell echo $(DATE) | sed 's/\(.\{4\}\)-.*/\1/')
 MONTH =	$(shell echo $(DATE) | sed 's/.\{4\}-\(.\{2\}\)-.*/\1/')
 
-.PHONY: gcloud s3
+.PHONY: gcloud s3 s3-positions s3-patterns s3-pattern_stops
 
 scrape: ; $(PYTHON) src/scrape.py -d "$(CONNECTION)" --patterns --positions
 
-s3: $(YEAR)/$(MONTH)/$(DATE)-positions.csv.xz $(YEAR)/$(MONTH)/$(DATE)-patterns.csv.xz $(YEAR)/$(MONTH)/$(DATE)-patternstops.csv.xz
-	for f in $(^F); do aws s3 cp --quiet --acl public-read $(<F)/$$f s3://$(BUCKET) ; done
+s3: s3-positions s3-patterns s3-pattern_stops
+
+s3-positions s3-patterns s3-pattern_stops: s3-%: $(YEAR)/$(MONTH)/$(DATE)-%.csv.xz
+	aws s3 cp --quiet --acl public-read $< s3://$(BUCKET)/$<
 
 gcloud: $(YEAR)/$(MONTH)/$(DATE)-positions.csv.xz
 	gsutil cp -rna public-read $< gs://$(BUCKET)/$<
