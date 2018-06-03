@@ -21,6 +21,7 @@ limitations under the License.
 from __future__ import print_function
 import os
 import sys
+import getpass
 try:
     from itertools import zip_longest
 except ImportError:
@@ -147,17 +148,33 @@ def get_current_pids(cursor):
     return set(row[0] for row in cursor.fetchall())
 
 
+def connection_params():
+    pg = {
+        'PGUSER': 'user',
+        'PGHOST': 'host',
+        'PGPORT': 'port',
+        'PGPASSWORD': 'password',
+        'PGPASSFILE': 'passfile',
+    }
+    params = {'dbname': os.environ.get('PGDATABASE', getpass.getuser())}
+    params.update({v: os.environ[k] for k, v in pg.items() if k in os.environ})
+    return params
+
+
 def main():
     """Scrape positions."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--database', default=None, required=True,
-                        help='Database connection string')
+    desc = """
+        Scrape CTA bus positions into a PostgreSQL database.
+        By default, a local connection to your user's database will be created.
+        To specify other connection parameters, use the standard PG* environment variables.
+    """
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('--key', default=os.environ.get('CTA_API_KEY'))
     parser.add_argument('--positions', action='store_true', help='fetch positions')
     parser.add_argument('--patterns', action='store_true', help='fetch patterns')
     args = parser.parse_args()
 
-    with psycopg2.connect(args.database) as conn:
+    with psycopg2.connect(**connection_params()) as conn:
         cursor = conn.cursor()
 
         if args.positions:
@@ -170,7 +187,7 @@ def main():
             current_pids = get_current_pids(cursor)
             pids = set(x['pid'] for x in positions).difference(current_pids)
 
-            if len(pids) == 0:
+            if not pids:
                 print('No new patterns', file=sys.stderr)
 
             else:

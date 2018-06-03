@@ -16,30 +16,12 @@ shell = bash
 
 PYTHON = python
 
-PGHOST ?=
-PGPORT ?=
 PGUSER ?= $(USER)
 PGDATABASE ?= $(PGUSER)
 PSQLFLAGS = $(PGDATABASE)
-
-CONNECTION = dbname=$(PGDATABASE)
-
-ifdef PGHOST
-CONNECTION += host=$(PGHOST)
-PSQLFLAGS += -h $(PGHOST)
-endif
-
-ifdef PGPORT
-CONNECTION += port=$(PGPORT)
-PSQLFLAGS += -p $(PGPORT)
-endif
-
-ifdef PGUSER
-CONNECTION += user=$(PGUSER)
-PSQLFLAGS += -U $(PGUSER)
-endif
-
 PSQL = psql $(PSQLFLAGS)
+
+export PGDATABASE PGUSER
 
 BUCKET = chibus
 DATE = 2018-01-01
@@ -48,7 +30,8 @@ MONTH =	$(shell echo $(DATE) | sed 's/.\{4\}-\(.\{2\}\)-.*/\1/')
 
 .PHONY: gcloud s3 s3-positions s3-patterns s3-pattern_stops
 
-scrape: ; $(PYTHON) src/scrape.py -d "$(CONNECTION)" --patterns --positions
+# Relies on environment variables being set
+scrape: ; $(PYTHON) src/scrape.py --patterns --positions
 
 s3: s3-positions s3-patterns s3-pattern_stops
 

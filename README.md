@@ -4,6 +4,7 @@ Archive bus positions served by the [CTA Bus Tracker](https://www.transitchicago
 
 ## Requirements
 
+* Make in a bash environment
 * Python (2.7+ or 3.5+)
 * PostGreSQL (9.5+)
 
@@ -37,12 +38,12 @@ make init
 
 To save the current snapshot of bus positions:
 ```
-python src/scrape.py -d dbname=database --positions
+python src/scrape.py --positions
 ```
 
 or, for short:
 ```
-make -e scrape
+make scrape
 ```
 
 This will update the Postgres database with current positions as well as new bus patterns.
