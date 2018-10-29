@@ -66,8 +66,8 @@ INSERT_POSITIONS = """
 """
 
 INSERT_PATTERNS = """
-    INSERT INTO cta.patterns ("pid", "length", "route_direction")
-    VALUES (%(pid)s::integer, %(ln)s, %(rtdir)s)
+    INSERT INTO cta.patterns ("pid", "length", "route_id", "route_direction")
+    VALUES (%(pid)s::integer, %(ln)s, %(rt)s, %(rtdir)s)
     ON CONFLICT DO NOTHING
 """
 
