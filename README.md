@@ -1,6 +1,19 @@
 # cta bus archiver
 
-Archive bus positions served by the [CTA Bus Tracker](https://www.transitchicago.com/developers/bustracker/) API.
+Archives bus positions served by the [CTA Bus Tracker](https://www.transitchicago.com/developers/bustracker/) API.
+
+## Active Transportation Alliance archive
+
+The Active Transportation Alliance maintains a daily archive of Bus Tracker data. The data is in `.xz` compressed CSV format. There are three files for each day, following this pattern:
+```
+https://s3.us-east-2.amazonaws.com/chibus/yyyy/mm/yyyy-mm-dd-pattern_stops.csv.xz
+https://s3.us-east-2.amazonaws.com/chibus/yyyy/mm/yyyy-mm-dd-patterns.csv.xz
+https://s3.us-east-2.amazonaws.com/chibus/yyyy/mm/yyyy-mm-dd-positions.csv.xz
+```
+
+For example: `https://s3.us-east-2.amazonaws.com/chibus/2018/03/2018-03-22-pattern_stops.csv.xz`.
+
+The archive begins in October, 2018. Some data is also available for selected days starting in March, 2018.
 
 ## Requirements
 
