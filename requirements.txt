@@ -1,2 +1,2 @@
 psycopg2 >=2.7.4, <2.8
-requests >=2.18.4, <2.19
+requests>=2.20.0
